@@ -99,7 +99,7 @@ class BeliefStateAgent(Agent):
         """
 
         # XXX: Your code here
-
+                
         # XXX: End of your code
 
         return belief
