@@ -46,7 +46,18 @@ class BeliefStateAgent(Agent):
         The element at position (w, h) is the probability
         P(E_t=evidence | X_t=(w, h))
         """
-        pass
+        walls = self.walls
+        w = walls.width
+        h = walls.height
+
+        sensor = np.zeros((w,h))
+
+        for i in range(w):
+          for j in range(h):
+            distPacmanIJ = util.manhattanDistance(pacman_position,(i,j))
+            sensor[i][j] = binom.pmf(distPacmanIJ - evidence + self.n*self.p, self.n, self.p)
+
+        return sensor
 
     def _get_transition_model(self, pacman_position):
         """
@@ -63,7 +74,47 @@ class BeliefStateAgent(Agent):
         The element at position (w1, h1, w2, h2) is the probability
         P(X_t+1=(w1, h1) | X_t=(w2, h2))
         """
-        pass
+        walls = self.walls
+
+        w = walls.width
+        h = walls.height
+        ghostType = self.ghost_type
+
+        neighbors = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
+        transition = np.zeros((w, h, w, h))
+
+        if ghostType == "confused":
+          mul = 1
+        elif ghostType == "afraid":
+          mul = 2
+        else:
+          mul = 8
+
+        for i in range(1, w-1):
+          for j in range(1, h-1):
+
+            if not walls[i][j]:
+              dist = util.manhattanDistance(pacman_position, (i,j))
+              norm = 0
+
+              for (k, l) in neighbors:
+                if walls[i + k][j + l]:
+                  transition[i + k][j + l][i][j] = 0
+
+                elif dist < util.manhattanDistance(pacman_position, (i + k, j + l)):
+                  norm += mul
+                  transition[i + k][j + l][i][j] = mul
+                
+                else:
+                  norm += 1
+                  transition[i + k][j + l][i][j] = 1
+                
+              for (k, l) in neighbors:
+                if norm != 0:
+                  transition[i + k][j + l][i][j] /= norm
+
+        return transition
 
     def _get_updated_belief(self, belief, evidences, pacman_position,
             ghosts_eaten):
@@ -97,10 +148,36 @@ class BeliefStateAgent(Agent):
         N.B. : [0,0] is the bottom left corner of the maze.
                Matrices filled with zeros must be returned for eaten ghosts.
         """
+        walls = self.walls
+        w = walls.width
+        h = walls.height
 
-        # XXX: Your code here
-                
-        # XXX: End of your code
+        transition = self._get_transition_model(pacman_position)
+        belief = []
+        
+        nGhosts = len(ghosts_eaten)
+        ghostsBelief = self.beliefGhostStates
+
+        for ghost in range(nGhosts):
+          sumMatrix = np.zeros((w,h))
+          sensor = self._get_sensor_model(pacman_position, evidences[ghost])
+
+          for i in range(1, w-1):
+            for j in range(1, h-1):
+              if not ghosts_eaten[ghost]:
+                for k in range(w):
+                  for l in range(h):
+                    sumElem = ghostsBelief[ghost][i][j] * transition[k][l][i][j]
+                    sumMatrix[k][l] += sumElem
+          
+          matrixProduct = np.multiply(sensor,sumMatrix)
+
+          norm = sum(sum(matrixProduct))
+
+          if norm:
+            matrixProduct /= norm
+          
+          belief.append((matrixProduct))
 
         return belief
 
