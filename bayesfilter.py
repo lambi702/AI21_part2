@@ -111,7 +111,7 @@ class BeliefStateAgent(Agent):
                             transition[i + k][j + l][i][j] = 0
 
                         elif dist < util.manhattanDistance(pacman_position,
-                                                          (i + k, j + l)):
+                                                           (i + k, j + l)):
                             norm += mul
                             transition[i + k][j + l][i][j] = mul
 

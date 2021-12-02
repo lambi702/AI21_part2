@@ -14,6 +14,8 @@ def keyHash(state, ghostID):
     ----------
     - `state`: current gameState, see class
                 `pacman.gameState`.
+    - `ghostID`: integer representing the ghost we're currently
+                  computing astar for.
 
     Return:
     -------
@@ -84,7 +86,11 @@ class PacmanAgent(Agent):
         - `state`: the current game state. See FAQ and class
                     `pacman.GameState`.
         - `maxBeliefPos`: Tuple representing the position of the square with
-                            max belief of position for the ghost in next state
+                            max belief of position for the ghost in next state.
+        - `belief_state`: Probability 4-D matrix indexed by ghost ID
+                           and a position.
+        - `ghostID`: integer representing the ghost we're currently
+                      computing astar for.
 
         Return:
         -------
@@ -114,7 +120,9 @@ class PacmanAgent(Agent):
                 for nextState, move in currentState.generatePacmanSuccessors():
                     if keyHash(nextState, ghostID) not in closedSet:
                         newBackCost = backCost + 1
-                        cost = manhattanDistance(pacPos, maxBeliefPos) * (1-0.5*belief_state[ghostID-1][maxBeliefPos[0]][maxBeliefPos[1]])
+                        cost = manhattanDistance(pacPos, maxBeliefPos) *\
+                            (1-0.5*belief_state[ghostID-1][maxBeliefPos[0]]
+                                [maxBeliefPos[1]])
                         priority = cost + newBackCost
                         queue.push((newBackCost, toReturn + [move],
                                     nextState), priority)
