@@ -57,12 +57,13 @@ class BeliefStateAgent(Agent):
         w = walls.width
         h = walls.height
 
-        sensor = np.zeros((w,h))
+        sensor = np.zeros((w, h))
 
         for i in range(w):
-          for j in range(h):
-            distPacmanIJ = util.manhattanDistance(pacman_position,(i,j))
-            sensor[i][j] = binom.pmf(distPacmanIJ - evidence + self.n*self.p, self.n, self.p)
+            for j in range(h):
+                distPacmanIJ = util.manhattanDistance(pacman_position, (i, j))
+                sensor[i][j] = binom.pmf(distPacmanIJ - evidence +
+                                         self.n*self.p, self.n, self.p)
 
         return sensor
 
@@ -92,39 +93,40 @@ class BeliefStateAgent(Agent):
         transition = np.zeros((w, h, w, h))
 
         if ghostType == "confused":
-          mul = 1
+            mul = 1
         elif ghostType == "afraid":
-          mul = 2
+            mul = 2
         else:
-          mul = 8
+            mul = 8
 
         for i in range(1, w-1):
-          for j in range(1, h-1):
+            for j in range(1, h-1):
 
-            if not walls[i][j]:
-              dist = util.manhattanDistance(pacman_position, (i,j))
-              norm = 0
+                if not walls[i][j]:
+                    dist = util.manhattanDistance(pacman_position, (i, j))
+                    norm = 0
 
-              for (k, l) in neighbors:
-                if walls[i + k][j + l]:
-                  transition[i + k][j + l][i][j] = 0
+                for (k, l) in neighbors:
+                    if walls[i + k][j + l]:
+                        transition[i + k][j + l][i][j] = 0
 
-                elif dist < util.manhattanDistance(pacman_position, (i + k, j + l)):
-                  norm += mul
-                  transition[i + k][j + l][i][j] = mul
-                
-                else:
-                  norm += 1
-                  transition[i + k][j + l][i][j] = 1
-                
-              for (k, l) in neighbors:
-                if norm != 0:
-                  transition[i + k][j + l][i][j] /= norm
+                    elif dist < util.manhattanDistance(pacman_position,
+                                                       (i + k, j + l)):
+                        norm += mul
+                        transition[i + k][j + l][i][j] = mul
+
+                    else:
+                        norm += 1
+                        transition[i + k][j + l][i][j] = 1
+
+                for (k, l) in neighbors:
+                    if norm != 0:
+                        transition[i + k][j + l][i][j] /= norm
 
         return transition
 
     def _get_updated_belief(self, belief, evidences, pacman_position,
-            ghosts_eaten):
+                            ghosts_eaten):
         """
         Given a list of (noised) distances from pacman to ghosts,
         and the previous belief states before receiving the evidences,
@@ -161,30 +163,31 @@ class BeliefStateAgent(Agent):
 
         transition = self._get_transition_model(pacman_position)
         belief = []
-        
+
         nGhosts = len(ghosts_eaten)
         ghostsBelief = self.beliefGhostStates
 
         for ghost in range(nGhosts):
-          sumMatrix = np.zeros((w,h))
-          sensor = self._get_sensor_model(pacman_position, evidences[ghost])
+            sumMatrix = np.zeros((w, h))
+            sensor = self._get_sensor_model(pacman_position, evidences[ghost])
 
-          for i in range(1, w-1):
-            for j in range(1, h-1):
-              if not ghosts_eaten[ghost]:
-                for k in range(w):
-                  for l in range(h):
-                    sumElem = ghostsBelief[ghost][i][j] * transition[k][l][i][j]
-                    sumMatrix[k][l] += sumElem
-          
-          matrixProduct = np.multiply(sensor,sumMatrix)
+            for i in range(1, w-1):
+                for j in range(1, h-1):
+                    if not ghosts_eaten[ghost]:
+                        for k in range(w):
+                            for l in range(h):
+                                sumElem = ghostsBelief[ghost][i][j] * \
+                                           transition[k][l][i][j]
+                                sumMatrix[k][l] += sumElem
 
-          norm = sum(sum(matrixProduct))
+            matrixProduct = np.multiply(sensor, sumMatrix)
 
-          if norm:
-            matrixProduct /= norm
-          
-          belief.append((matrixProduct))
+            norm = sum(sum(matrixProduct))
+
+            if norm:
+                matrixProduct /= norm
+
+            belief.append((matrixProduct))
 
         return belief
 
@@ -274,34 +277,34 @@ class BeliefStateAgent(Agent):
         h = walls.height
 
         for ghostID in range(1, len(belief_states) + 1):
-          ghostPos = state.getGhostPosition(ghostID)
+            ghostPos = state.getGhostPosition(ghostID)
 
-          returnBelief = 0.0
-          returnQuality = 0
+            returnBelief = 0.0
+            returnQuality = 0
 
-          if ghostPos[0] >= 0:
-            maxBeliefPos = (0,0)
-            maxBelief = 0.0
+            if ghostPos[0] >= 0:
+                maxBeliefPos = (0, 0)
+                maxBelief = 0.0
 
-            for i in range(w):
-              for j in range(h):
-                belief = belief_states[ghostID - 1][i][j]
+                for i in range(w):
+                    for j in range(h):
+                        belief = belief_states[ghostID - 1][i][j]
 
-                if belief > maxBelief:
-                  maxBeliefPos = (i, j)
-                  maxBelief = belief
+                        if belief > maxBelief:
+                            maxBeliefPos = (i, j)
+                            maxBelief = belief
 
-            returnBelief = maxBelief
-            returnQuality = util.manhattanDistance(ghostPos, maxBeliefPos)
+                returnBelief = maxBelief
+                returnQuality = util.manhattanDistance(ghostPos, maxBeliefPos)
 
-          file = open("values.txt", "w")
-          file.write("%f \n" %returnBelief)
-          file.write("%d \n" %returnQuality)
-          file.close()
-        
+            file = open("values.txt", "w")
+            file.write("%f \n" % returnBelief)
+            file.write("%d" % returnQuality)
+            file.close()
+
         if self.nbIt == 100:
-          exit()
-        
+            exit()
+
         self.nbIt += 1
         """
         pass

@@ -123,4 +123,3 @@ class PacmanAgent(Agent):
 
                         if nextPacPos == maxBeliefPos:
                             return toReturn
-
