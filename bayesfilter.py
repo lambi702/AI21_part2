@@ -106,22 +106,22 @@ class BeliefStateAgent(Agent):
                     dist = util.manhattanDistance(pacman_position, (i, j))
                     norm = 0
 
-                for (k, l) in neighbors:
-                    if walls[i + k][j + l]:
-                        transition[i + k][j + l][i][j] = 0
+                    for (k, l) in neighbors:
+                        if walls[i + k][j + l]:
+                            transition[i + k][j + l][i][j] = 0
 
-                    elif dist < util.manhattanDistance(pacman_position,
-                                                       (i + k, j + l)):
-                        norm += mul
-                        transition[i + k][j + l][i][j] = mul
+                        elif dist < util.manhattanDistance(pacman_position,
+                                                          (i + k, j + l)):
+                            norm += mul
+                            transition[i + k][j + l][i][j] = mul
 
-                    else:
-                        norm += 1
-                        transition[i + k][j + l][i][j] = 1
+                        else:
+                            norm += 1
+                            transition[i + k][j + l][i][j] = 1
 
-                for (k, l) in neighbors:
-                    if norm != 0:
-                        transition[i + k][j + l][i][j] /= norm
+                    for (k, l) in neighbors:
+                        if norm != 0:
+                            transition[i + k][j + l][i][j] /= norm
 
         return transition
 
