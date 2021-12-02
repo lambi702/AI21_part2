@@ -53,6 +53,7 @@ class PacmanAgent(Agent):
 
         ghost = 1
 
+        # We focus on the first ghost not eaten in the list
         while belief_state[ghost - 1].max() == 0 and \
                 ghost <= len(belief_state):
             ghost += 1
@@ -64,15 +65,18 @@ class PacmanAgent(Agent):
             for j in range(h):
                 belief = belief_state[ghost - 1][i][j]
 
+                # find maxBelief and the position relative
                 if belief > maxBelief:
                     maxBeliefPos = (i, j)
                     maxBelief = belief
 
+        # compute path to maxBeliefPos
         aStar = self.aStar(state, maxBeliefPos, belief_state, ghost)
 
         if aStar == []:
             return Directions.STOP
 
+        # We need to return the first element of the array
         move = aStar.pop(0)
 
         return move
@@ -105,6 +109,7 @@ class PacmanAgent(Agent):
 
         pacPos = state.getPacmanPosition()
 
+        # no path needed
         if pacPos == maxBeliefPos:
             return toReturn
 
@@ -114,10 +119,13 @@ class PacmanAgent(Agent):
 
             priority, (backCost, toReturn, currentState) = queue.pop()
 
+            # check the unique hash in the set
             if keyHash(currentState, ghostID) not in closedSet:
                 closedSet.add(keyHash(currentState, ghostID))
 
                 for nextState, move in currentState.generatePacmanSuccessors():
+
+                    # compute next state in the path in the set
                     if keyHash(nextState, ghostID) not in closedSet:
                         newBackCost = backCost + 1
                         cost = manhattanDistance(pacPos, maxBeliefPos) *\
