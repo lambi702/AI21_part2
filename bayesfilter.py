@@ -61,6 +61,7 @@ class BeliefStateAgent(Agent):
 
         for i in range(w):
             for j in range(h):
+                # compute pacman distance from (i,j) and compute with binomial
                 distPacmanIJ = util.manhattanDistance(pacman_position, (i, j))
                 sensor[i][j] = binom.pmf(distPacmanIJ - evidence +
                                          self.n*self.p, self.n, self.p)
@@ -92,6 +93,7 @@ class BeliefStateAgent(Agent):
 
         transition = np.zeros((w, h, w, h))
 
+        # setting mul to a value relative to the ghost's behaviour
         if ghostType == "confused":
             mul = 1
         elif ghostType == "afraid":
@@ -107,14 +109,17 @@ class BeliefStateAgent(Agent):
                     norm = 0
 
                     for (k, l) in neighbors:
+                        # if neighbor is a wall, probability = 0
                         if walls[i + k][j + l]:
                             transition[i + k][j + l][i][j] = 0
 
+                        # ghost gets closer
                         elif dist < util.manhattanDistance(pacman_position,
                                                            (i + k, j + l)):
                             norm += mul
                             transition[i + k][j + l][i][j] = mul
 
+                        # ghost drives away from pacman
                         else:
                             norm += 1
                             transition[i + k][j + l][i][j] = 1
@@ -173,13 +178,16 @@ class BeliefStateAgent(Agent):
 
             for i in range(1, w-1):
                 for j in range(1, h-1):
+                    # we have to skip to eaten ghosts
                     if not ghosts_eaten[ghost]:
                         for k in range(w):
                             for l in range(h):
+                                # compute each element
                                 sumElem = ghostsBelief[ghost][i][j] * \
                                            transition[k][l][i][j]
                                 sumMatrix[k][l] += sumElem
 
+            # thanks to the use of numpy, the next steps are easy
             matrixProduct = np.multiply(sensor, sumMatrix)
 
             norm = sum(sum(matrixProduct))
