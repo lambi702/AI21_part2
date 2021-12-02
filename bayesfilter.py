@@ -1,7 +1,11 @@
 # Complete this class for all parts of the project
 
-from pacman_module.game import Agent
 import numpy as np
+
+# import matplotlib.pyplot as plt
+# only important for record_metrics
+
+from pacman_module.game import Agent
 from pacman_module import util
 from scipy.stats import binom
 
@@ -18,6 +22,9 @@ class BeliefStateAgent(Agent):
             Variables to use in 'update_belief_state' method.
             Initialization occurs in 'get_action' method.
         """
+        # Variables used for record_metrics
+        self.nbIt = 0
+
         # Current list of belief states over ghost positions
         self.beliefGhostStates = None
 
@@ -259,6 +266,43 @@ class BeliefStateAgent(Agent):
            of the maze layout and Z is the number of ghosts.
 
         N.B. : [0,0] is the bottom left corner of the maze
+        """
+        """
+        walls = self.walls
+
+        w = walls.width
+        h = walls.height
+
+        for ghostID in range(1, len(belief_states) + 1):
+          ghostPos = state.getGhostPosition(ghostID)
+
+          returnBelief = 0.0
+          returnQuality = 0
+
+          if ghostPos[0] >= 0:
+            maxBeliefPos = (0,0)
+            maxBelief = 0.0
+
+            for i in range(w):
+              for j in range(h):
+                belief = belief_states[ghostID - 1][i][j]
+
+                if belief > maxBelief:
+                  maxBeliefPos = (i, j)
+                  maxBelief = belief
+
+            returnBelief = maxBelief
+            returnQuality = util.manhattanDistance(ghostPos, maxBeliefPos)
+
+          file = open("values.txt", "w")
+          file.write("%f \n" %returnBelief)
+          file.write("%d \n" %returnQuality)
+          file.close()
+        
+        if self.nbIt == 100:
+          exit()
+        
+        self.nbIt += 1
         """
         pass
 
