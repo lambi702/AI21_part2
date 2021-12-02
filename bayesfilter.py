@@ -22,8 +22,8 @@ class BeliefStateAgent(Agent):
             Variables to use in 'update_belief_state' method.
             Initialization occurs in 'get_action' method.
         """
-        # Variables used for record_metrics
-        self.nbIt = 0
+        # Variable used for record_metrics
+        # self.nbIt = 0
 
         # Current list of belief states over ghost positions
         self.beliefGhostStates = None

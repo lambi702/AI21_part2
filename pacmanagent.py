@@ -66,7 +66,7 @@ class PacmanAgent(Agent):
                     maxBeliefPos = (i, j)
                     maxBelief = belief
 
-        aStar = self.aStar(state, maxBeliefPos, ghost)
+        aStar = self.aStar(state, maxBeliefPos, belief_state, ghost)
 
         if aStar == []:
             return Directions.STOP
@@ -75,7 +75,7 @@ class PacmanAgent(Agent):
 
         return move
 
-    def aStar(self, state, maxBeliefPos, ghostID):
+    def aStar(self, state, maxBeliefPos, belief_state, ghostID):
         """
         Computes the path to find to go to maxBelief node in the fastest way
 
@@ -114,7 +114,7 @@ class PacmanAgent(Agent):
                 for nextState, move in currentState.generatePacmanSuccessors():
                     if keyHash(nextState, ghostID) not in closedSet:
                         newBackCost = backCost + 1
-                        cost = manhattanDistance(pacPos, maxBeliefPos)
+                        cost = manhattanDistance(pacPos, maxBeliefPos) * (1-0.5*belief_state[ghostID-1][maxBeliefPos[0]][maxBeliefPos[1]])
                         priority = cost + newBackCost
                         queue.push((newBackCost, toReturn + [move],
                                     nextState), priority)
